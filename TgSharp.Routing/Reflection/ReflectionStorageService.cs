@@ -20,4 +20,9 @@ public class ReflectionStorageService : IReflectionStorageService
             throw new Exception(); // TODO: Create exception class
         }
     }
+
+    public MethodInfo? GetSlashCommandHandlerFromStorage(string command)
+    {
+        return _slashCommandHandlersStorage.GetValueOrDefault(command);
+    }
 }

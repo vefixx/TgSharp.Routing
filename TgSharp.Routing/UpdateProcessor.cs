@@ -2,10 +2,17 @@
 
 namespace TgSharp.Routing;
 
-public class UpdateProcessor : IUpdateProcessor                                         
+public class UpdateProcessor : IUpdateProcessor
 {
-    public Task ProcessAsync(Update update, CancellationToken cancellationToken)
+    private readonly IDispatcher _dispatcher;
+
+    public UpdateProcessor(IDispatcher dispatcher)
     {
-        return Task.CompletedTask;
+        _dispatcher = dispatcher;
+    }
+
+    public async Task ProcessAsync(Update update, CancellationToken cancellationToken)
+    {
+        await _dispatcher.OnUpdateAsync(update, cancellationToken);
     }
 }
