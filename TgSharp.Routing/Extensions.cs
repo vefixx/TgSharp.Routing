@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Telegram.BotAPI;
+using TgSharp.Routing.Reflection.Interfaces;
 
 namespace TgSharp.Routing;
 
@@ -12,6 +13,8 @@ public static class Extensions
         
         services.AddSingleton<TelegramBotClient>(botClient);
         services.AddSingleton<RouterOptions>(routerOptions);
+        services.AddSingleton<IReflectionStorageService, IReflectionStorageService>();
+        services.AddSingleton<IReflectionRegisterService, IReflectionRegisterService>();
         services.AddSingleton<IRouterProcessor, RouterProcessor>();
         services.AddSingleton<IUpdateProcessor, UpdateProcessor>();
         services.AddHostedService<Router>();
