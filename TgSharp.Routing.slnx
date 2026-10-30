@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Folder Name="/Examples/">
+    <Project Path="TgSharp.Routing.Example/TgSharp.Routing.Example.csproj" />
+  </Folder>
+  <Project Path="TgSharp.Routing/TgSharp.Routing.csproj" />
+</Solution>
