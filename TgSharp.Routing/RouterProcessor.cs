@@ -7,41 +7,46 @@ public class RouterProcessor : IRouterProcessor
 {
     private readonly TelegramBotClient _botClient;
     private readonly IUpdateProcessor _updateProcessor;
+    private readonly RouterOptions _routerOptions;
     private int? _offset;
     private bool _firstExecute;
     private IEnumerable<Update> _updates;
 
-    public RouterProcessor(TelegramBotClient botClient, IUpdateProcessor updateProcessor)
+    public RouterProcessor(TelegramBotClient botClient, IUpdateProcessor updateProcessor, RouterOptions routerOptions)
     {
         _botClient = botClient;
         _updateProcessor = updateProcessor;
+        _routerOptions = routerOptions;
         _offset = null;
         _updates = [];
         _firstExecute = true;
     }
     
     /// <summary>
-    /// Выполняет запрос к просмотру событий бота
+    /// Выполняет запрос к просмотру событий бота. Пропускает события, которые приходили до включения бота
     /// </summary>
     /// <param name="cancellationToken"></param>
     public async Task ProcessAsync(CancellationToken cancellationToken)
     {
         // Если это первый запуск, то сливаем всю очередь накопившихся событий
-        if (_firstExecute)
+        if (_routerOptions.SkipPendingUpdates)
         {
-            IEnumerable<Update> pendingUpdates;
-            do
+            if (_firstExecute)
             {
-                pendingUpdates = await _botClient.GetUpdatesAsync(offset: _offset, cancellationToken: cancellationToken);
-                if (pendingUpdates.Any())
+                IEnumerable<Update> pendingUpdates;
+                do
                 {
-                    // Сдвигаем offset, чтобы отметить их как прочитанные, но не обрабатываем
-                    _offset = pendingUpdates.Last().UpdateId + 1;
+                    pendingUpdates = await _botClient.GetUpdatesAsync(offset: _offset, cancellationToken: cancellationToken);
+                    if (pendingUpdates.Any())
+                    {
+                        // Сдвигаем offset, чтобы отметить их как прочитанные, но не обрабатываем
+                        _offset = pendingUpdates.Last().UpdateId + 1;
+                    }
                 }
-            } 
-            while (pendingUpdates.Any()); // Повторяем, пока не обработаем все события, т.к. limit максимум 100
+                while (pendingUpdates.Any()); // Повторяем, пока не обработаем все события, т.к. limit максимум 100
             
-            _firstExecute = false;
+                _firstExecute = false;
+            }
         }
         
         // Получаем только новые события
